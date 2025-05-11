@@ -1,4 +1,13 @@
-import { app, BrowserWindow, Tray, Menu, screen, ipcMain, dialog } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Tray,
+  Menu,
+  screen,
+  ipcMain,
+  dialog,
+  shell,
+} from "electron";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import * as fs from "node:fs";
@@ -49,9 +58,10 @@ app.whenReady().then(() => {
     show: false, // Show on start
     skipTaskbar: true, // Hide from taskbar
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: false,
     },
     resizable: false,
   });
@@ -104,6 +114,10 @@ app.whenReady().then(() => {
       return result.filePaths[0];
     }
     return null;
+  });
+
+  ipcMain.on("open-folder", (event, path) => {
+    shell.openPath(path);
   });
 
   ipcMain.on("download-files-to", (event, { urls, targetPath }) => {
