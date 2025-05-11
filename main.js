@@ -1,6 +1,10 @@
-import { app, BrowserWindow, Tray, Menu, screen } from "electron";
+import { app, BrowserWindow, Tray, Menu, screen, ipcMain, dialog } from "electron";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import * as fs from "node:fs";
+import http from "node:http";
+import https from "https";
+import path from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,26 +46,24 @@ app.whenReady().then(() => {
     height: windowHeight,
     frame: false,
     transparent: true,
-    show: false, // Start show
+    show: false, // Show on start
     skipTaskbar: true, // Hide from taskbar
     webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
     },
-    resizable: false
+    resizable: false,
   });
 
   mainWindow.loadURL("http://localhost:3000");
+  // mainWindow.webContents.openDevTools();
 
   mainWindow.webContents.on("did-fail-load", () => {
     console.error("Failed to load http://localhost:3000");
 
     mainWindow.loadFile(join(__dirname, "public", "fallback.html"));
   });
-
-  // mainWindow.on("blur", () => {
-  //   mainWindow.hide();
-  // });
 
   try {
     tray = new Tray(join(__dirname, "public", "icon.png"));
@@ -92,6 +94,42 @@ app.whenReady().then(() => {
       positionWindow();
       mainWindow.show();
     }
+  });
+
+  ipcMain.handle("select-folder", async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openDirectory"],
+    });
+    if (!result.canceled && result.filePaths.length > 0) {
+      return result.filePaths[0];
+    }
+    return null;
+  });
+
+  ipcMain.on("download-files-to", (event, { urls, targetPath }) => {
+    urls.forEach((url) => {
+      const fileName = path.basename(new URL(url).pathname);
+      const filePath = path.join(targetPath, fileName);
+      const fileStream = fs.createWriteStream(filePath);
+
+      const protocol = url.startsWith("https") ? https : http;
+
+      protocol
+        .get(url, (response) => {
+          if (response.statusCode === 200) {
+            response.pipe(fileStream);
+            fileStream.on("finish", () => {
+              fileStream.close();
+              console.log(`Baixado em: ${filePath}`);
+            });
+          } else {
+            console.error(`Erro ao baixar ${url}: ${response.statusCode}`);
+          }
+        })
+        .on("error", (err) => {
+          console.error(`Erro: ${err.message}`);
+        });
+    });
   });
 
   positionWindow();
