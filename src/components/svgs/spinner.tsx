@@ -1,6 +1,6 @@
 import { ComponentPropsWithoutRef } from "react";
 
-import { cn } from "../utils";
+import { cn } from "@/lib/utils";
 
 export function SpinnerSvg({
   className,
@@ -20,7 +20,7 @@ export function SpinnerSvg({
         cy="12"
         r="10"
         stroke="currentColor"
-        stroke-width="4"
+        strokeWidth="4"
       ></circle>
       <path
         className="opacity-75"

@@ -1,4 +1,4 @@
-import { SpinnerSvg } from "@/lib/svgs/spinner";
+import { SpinnerSvg } from "@/components/svgs/spinner";
 
 export function Loading() {
   return (

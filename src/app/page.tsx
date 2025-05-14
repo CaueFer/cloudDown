@@ -1,5 +1,3 @@
-"use server";
-
 import { lazy, Suspense } from "react";
 
 import { ResizablePanelGroup } from "@/components/ui/resizable";
@@ -9,7 +7,7 @@ import { Footer } from "@/components/view/footer";
 
 const Layout = lazy(() => import("@/components/view/contentLayout"));
 
-export default async function Home() {
+export default function Home() {
   return (
     <div className="w-[300px] h-[500px] font-[family-name:var(--font-geist-sans)] bg-zinc-950 text-white rounded-lg border border-zinc-700 overflow-hidden">
       <main>

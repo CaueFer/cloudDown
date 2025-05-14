@@ -23,9 +23,10 @@ export default function FilepathModal({
 }: FilepathModalProps) {
   useEffect(() => {
     const getDownloadPath = async () => {
-      const defaultPath = await window?.electronAPI?.getDefaultDownloadPath?.();
-      if (defaultPath) {
-        setFolderPath(defaultPath);
+      const defaultPathResponse =
+        await window?.electronAPI?.getDefaultDownloadPath?.();
+      if (defaultPathResponse) {
+        setFolderPath(defaultPathResponse.defaultDownloadPath);
       }
     };
 
@@ -37,6 +38,8 @@ export default function FilepathModal({
 
     const selectedPath = await window?.electronAPI?.selectFolder();
     if (selectedPath) {
+      await window?.electronAPI?.setDefaultDownloadPath?.(selectedPath);
+
       setFolderPath(selectedPath);
     }
   };

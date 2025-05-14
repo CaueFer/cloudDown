@@ -17,6 +17,7 @@ export default function FooterContent() {
 
   return (
     <>
+      {/* OPEN FOLDER */}
       <Button
         variant="ghost"
         size="lg"
@@ -25,7 +26,8 @@ export default function FooterContent() {
       >
         <Folder />
       </Button>
-
+    
+      {/* CONFIGS */}
       <FilePathModal folderPath={folderPath} setFolderPath={setFolderPath}>
         <Button
           variant="ghost"
