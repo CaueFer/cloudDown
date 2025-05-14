@@ -14,9 +14,13 @@ import * as fs from "node:fs";
 import http from "node:http";
 import https from "https";
 import path from "path";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// PATH para configs do usuario
+const configPath = path.join(app.getPath("userData"), "config.json");
 
 let mainWindow;
 let tray;
@@ -48,6 +52,27 @@ const positionWindow = () => {
     height: windowHeight,
   });
 };
+
+function readConfig() {
+  try {
+    const data = fs.readFileSync(configPath, {
+      encoding: "utf8",
+    });
+    const config = JSON.parse(data);
+    return config;
+  } catch (err) {
+    console.error(err);
+    return { defaultDownloadPath: path.join(os.homedir(), "Downloads") };
+  }
+}
+
+function writeConfig(config) {
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf8");
+  } catch (error) {
+    console.error("Failed to write config:", error);
+  }
+}
 
 app.whenReady().then(() => {
   mainWindow = new BrowserWindow({
@@ -114,6 +139,19 @@ app.whenReady().then(() => {
       return result.filePaths[0];
     }
     return null;
+  });
+
+  ipcMain.handle("read-config", () => {
+    const config = readConfig();
+
+    return { defaultDownloadPath: config.defaultDownloadPath };
+  });
+
+  ipcMain.handle("set-config", (event, newPath) => {
+    const config = readConfig();
+    config.defaultDownloadPath = newPath;
+    writeConfig(config);
+    return { defaultDownloadPath: config.defaultDownloadPath };
   });
 
   ipcMain.on("open-folder", (event, path) => {
