@@ -11,7 +11,12 @@ export default function FooterContent() {
   const [folderPath, setFolderPath] = useState("");
 
   const openFolderInExplorer = () => {
-    if (!window?.electronAPI?.openFolder || !folderPath) return;
+    if (
+      !window?.electronAPI?.openFolder ||
+      !folderPath ||
+      typeof folderPath !== "string"
+    )
+      return;
     window.electronAPI.openFolder(folderPath);
   };
 
@@ -26,7 +31,7 @@ export default function FooterContent() {
       >
         <Folder />
       </Button>
-    
+
       {/* CONFIGS */}
       <FilePathModal folderPath={folderPath} setFolderPath={setFolderPath}>
         <Button

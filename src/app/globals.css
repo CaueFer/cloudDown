@@ -120,3 +120,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.hideScrollBar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

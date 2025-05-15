@@ -10,7 +10,7 @@ export default function ContentLayout() {
   const [pasteItems, setPasteItems] = useState<string[]>([]);
 
   const handlePasteItem = (item: string) => {
-    setPasteItems((prev) => [...prev, item]);
+    if (item) setPasteItems((prev) => [...prev, item]);
   };
 
   return (

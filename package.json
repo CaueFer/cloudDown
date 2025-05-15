@@ -11,6 +11,19 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "build": {
+    "files": [
+      "assets/**/*",
+      "src/**/*",
+      "public/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets/ffmpeg.exe",
+        "to": "ffmpeg.exe"
+      }
+    ]
+  },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
@@ -26,7 +39,8 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
     "react-resizable-panels": "^3.0.1",
-    "tailwind-merge": "^3.2.0"
+    "tailwind-merge": "^3.2.0",
+    "youtube-dl-exec": "^3.0.21"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
