@@ -23,35 +23,40 @@ export function DownloadItem({ item }: DownloadItemProps) {
   const [progress, setProgress] = useState(5);
 
   const downloadItem = useCallback(async () => {
-    const downloadPathResponse =
-      await window?.electronAPI?.getDefaultDownloadPath?.();
-    if (!downloadPathResponse) return;
+    const downloadPath = await window?.electronAPI?.getDefaultDownloadPath?.();
+    if (!downloadPath || !item) return;
 
     setStatus("downloading");
 
-    fetch("/api/download", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        link: item,
-        downloadPath: downloadPathResponse.defaultDownloadPath,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setStatus(data.status);
+    const eventStream = new EventSource(
+      `/api/download?link=${item}&dPath=${downloadPath.defaultDownloadPath}`
+    );
 
-        if (data.error) {
-          setError(data.error);
-          setProgress(0);
-          return;
+    eventStream.onmessage = (response) => {
+      try {
+        const responseData = JSON.parse(response.data);
+
+        if (responseData.event === "status") {
+          const data = responseData.data;
+
+          setStatus(data.status);
+
+          if (data.status === "downloading") {
+            setProgress(Number(data.progress));
+          }
+
+          if (data.status === "error") {
+            setError(data.error);
+          }
+
+          if (data.status === "downloaded") {
+            setProgress(100);
+          }
         }
-
-        setProgress(100);
-      })
-      .catch((err) => console.error(err));
+      } catch (err) {
+        console.error("Erro ao processar mensagem SSE:", err);
+      }
+    };
   }, [item]);
 
   useEffect(() => {
@@ -59,19 +64,24 @@ export function DownloadItem({ item }: DownloadItemProps) {
   }, [downloadItem, item]);
 
   return (
-    <div className="flex flex-row gap-1 items-center bg-muted/10 hover:bg-muted/20 w-full rounded-md ">
-      <div className="flex flex-col gap-1 w-full p-2">
-        <DownloadStatus status={status} error={error} />
-        <span className="text-sm">Nome do item</span>
-        <Progress value={progress} />
+    <div className="flex flex-col gap-1 items-center bg-muted/10 hover:bg-muted/20 w-full rounded-md p-2">
+      <div className="flex flex-row w-full py-2">
+        <div className="flex flex-col gap-1 w-full">
+          <DownloadStatus status={status} error={error} />
+          <span className="text-sm">Nome do item</span>
+        </div>
+        <div className="w-auto mr-3">
+          {status === "error" && (
+            <RefreshBtn className="text-red-500" downloadItem={downloadItem} />
+          )}
+          {status === "downloaded" && <CircleCheck />}
+          {status === "downloading" && (
+            <LoaderCircle className="animate-spin" />
+          )}
+        </div>
       </div>
-      <div className="w-auto p-2 mr-3">
-        {status === "error" && (
-          <RefreshBtn className="text-red-500" downloadItem={downloadItem} />
-        )}
-        {status === "downloaded" && <CircleCheck />}
-        {status === "downloading" && <LoaderCircle className="animate-spin" />}
-      </div>
+
+      {status !== "downloaded" && <Progress value={progress} />}
     </div>
   );
 }

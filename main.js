@@ -82,6 +82,7 @@ app.whenReady().then(() => {
     transparent: true,
     show: false, // Show on start
     skipTaskbar: true, // Hide from taskbar
+    alwaysOnTop: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
