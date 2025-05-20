@@ -45,12 +45,12 @@ export function DownloadItem({ item }: DownloadItemProps) {
             setProgress(Number(data.progress));
           }
 
-          if (data.status === "error") {
-            setError(data.error);
-          }
-
           if (data.status === "downloaded") {
             setProgress(100);
+          }
+
+          if (data.status === "error") {
+            setError(data.error);
           }
         }
       } catch (err) {

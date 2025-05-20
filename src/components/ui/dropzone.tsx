@@ -12,10 +12,13 @@ export function Dropzone({ handlePasteItem }: DropzoneProps) {
 
   const onDrop = useCallback((acceptedFiles: unknown) => {
     console.log(acceptedFiles);
+
+    // handlePasteItem(acceptedFiles[0] || "");
   }, []);
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     noClick: true,
+    autoFocus: true,
   });
 
   useEffect(() => {
