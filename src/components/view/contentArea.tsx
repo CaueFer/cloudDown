@@ -11,7 +11,7 @@ export function ContentArea({ pasteItems, setPasteItems }: ContentAreaProps) {
     <div className="flex flex-col gap-2 flex-1 items-start justify-start overflow-hidden p-4">
       <span className="font-semibold text-sm">My Downloads</span>
 
-      <div className="flex flex-col gap-4 w-full h-full mt-3 overflow-y-scroll hideScrollBar transition-all duration-300">
+      <div className="flex flex-col w-full h-full mt-3 overflow-y-scroll hideScrollBar transition-all duration-400 ease-in-out">
         {pasteItems.map((item) => (
           <DownloadItem
             key={item.id}

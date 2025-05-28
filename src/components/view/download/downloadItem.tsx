@@ -6,6 +6,7 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { CircleCheck, LoaderCircle } from "lucide-react";
@@ -23,6 +24,8 @@ interface DownloadItemProps extends ComponentPropsWithoutRef<"div"> {
   setPasteItems: Dispatch<SetStateAction<pasteItem[]>>;
 }
 export function DownloadItem({ item, setPasteItems }: DownloadItemProps) {
+  const itemRef = useRef<HTMLDivElement>(null);
+
   const [status, setStatus] = useState<TDownloadStatus>("downloading");
   const [error, setError] = useState<string>("");
   const [progress, setProgress] = useState(5);
@@ -64,12 +67,19 @@ export function DownloadItem({ item, setPasteItems }: DownloadItemProps) {
   }, [item]);
 
   useEffect(() => {
-    if (item) downloadItem();
+    if (item && !item.id.startsWith("del")) downloadItem();
   }, [downloadItem, item]);
 
   return (
-    <ContextMenuWrapper setPasteItems={setPasteItems} id={item.id}>
-      <div className="flex flex-col gap-1 items-center bg-muted/10 hover:bg-muted/20 w-full rounded-md p-2">
+    <ContextMenuWrapper
+      setPasteItems={setPasteItems}
+      id={item.id}
+      itemRef={itemRef}
+    >
+      <div
+        ref={itemRef}
+        className="flex flex-col gap-1 items-center bg-muted/10 hover:bg-muted/20 w-full rounded-md p-2 mb-4 transition-all duration-300"
+      >
         <div className="flex flex-row justify-between w-full py-2">
           <span
             className={cn("text-sm", {
@@ -93,7 +103,7 @@ export function DownloadItem({ item, setPasteItems }: DownloadItemProps) {
           </div>
         </div>
 
-        {status !== "downloaded" && <Progress value={progress} />}
+        {status === "downloading" && <Progress value={progress} />}
       </div>
     </ContextMenuWrapper>
   );
