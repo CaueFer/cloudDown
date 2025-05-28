@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { nanoid } from "nanoid";
 
 import { ResizableHandle, ResizablePanel } from "../ui/resizable";
 import { ContentArea } from "./contentArea";
 import { Dropzone } from "../ui/dropzone";
 
+import { pasteItem } from "@/lib/types.global";
+
 export default function ContentLayout() {
-  const [pasteItems, setPasteItems] = useState<string[]>([]);
+  const [pasteItems, setPasteItems] = useState<pasteItem[]>([]);
 
   const handlePasteItem = (item: string) => {
-    if (item) setPasteItems((prev) => [...prev, item]);
+    if (item) setPasteItems((prev) => [...prev, { url: item, id: nanoid() }]);
   };
 
   return (
@@ -27,7 +30,7 @@ export default function ContentLayout() {
         minSize={25}
         className="flex flex-col justify-between"
       >
-        <ContentArea pasteItems={pasteItems} />
+        <ContentArea pasteItems={pasteItems} setPasteItems={setPasteItems} />
       </ResizablePanel>
     </>
   );

@@ -1,0 +1,38 @@
+import { Dispatch, ReactNode, SetStateAction } from "react";
+import { Trash } from "lucide-react";
+
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "./context-menu";
+import { pasteItem } from "@/lib/types.global";
+
+interface ContextMenuWrapper {
+  children: ReactNode;
+  setPasteItems: Dispatch<SetStateAction<pasteItem[]>>;
+  id: string;
+}
+export function ContextMenuWrapper({
+  children,
+  setPasteItems,
+  id,
+}: ContextMenuWrapper) {
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger>{children}</ContextMenuTrigger>
+      <ContextMenuContent className="bg-zinc-950 border border-zinc-700 text-white shadow mr-1">
+        <ContextMenuItem
+          className="bg-zinc-950 dark"
+          variant="destructive"
+          onClick={() => {
+            setPasteItems((prev) => [...prev.filter((item) => item.id !== id)]);
+          }}
+        >
+          <Trash /> Deletar
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}

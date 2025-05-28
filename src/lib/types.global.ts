@@ -15,3 +15,8 @@ declare global {
     };
   }
 }
+
+export interface pasteItem {
+  id: string;
+  url: string;
+}
