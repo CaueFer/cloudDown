@@ -32,31 +32,23 @@ export function DownloadItem({ item }: DownloadItemProps) {
       `/api/download?link=${item}&dPath=${downloadPath.defaultDownloadPath}`
     );
 
-    eventStream.onmessage = (response) => {
+    eventStream.addEventListener("status", (event) => {
       try {
-        const responseData = JSON.parse(response.data);
+        const data = JSON.parse(event.data);
 
-        if (responseData.event === "status") {
-          const data = responseData.data;
+        setStatus(data.status);
 
-          setStatus(data.status);
-
-          if (data.status === "downloading") {
-            setProgress(Number(data.progress));
-          }
-
-          if (data.status === "downloaded") {
-            setProgress(100);
-          }
-
-          if (data.status === "error") {
-            setError(data.error);
-          }
+        if (data.status === "error") {
+          setError(data.error);
         }
+
+        if (data.status === "downloading") {
+          setProgress(Number(data.progress));
+        } else setProgress(100);
       } catch (err) {
         console.error("Erro ao processar mensagem SSE:", err);
       }
-    };
+    });
   }, [item]);
 
   useEffect(() => {

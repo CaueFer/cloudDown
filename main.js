@@ -89,11 +89,11 @@ app.whenReady().then(() => {
       nodeIntegration: false,
       sandbox: false,
     },
-    resizable: false,
+    resizable: true,
   });
 
   mainWindow.loadURL("http://localhost:3000");
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   mainWindow.webContents.on("did-fail-load", () => {
     console.error("Failed to load http://localhost:3000");
