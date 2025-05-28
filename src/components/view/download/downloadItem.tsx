@@ -7,12 +7,12 @@ import {
   useState,
 } from "react";
 
-import { DownloadStatus } from "./downloadStatus";
 import { Progress } from "../../ui/progress";
 import { RefreshBtn } from "./refreshBtn";
 
 import type { TDownloadStatus } from "./type";
 import { CircleCheck, LoaderCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface DownloadItemProps extends ComponentPropsWithoutRef<"div"> {
   item: string;
@@ -40,6 +40,8 @@ export function DownloadItem({ item }: DownloadItemProps) {
 
         if (data.status === "error") {
           setError(data.error);
+
+          eventStream.close();
         }
 
         if (data.status === "downloading") {
@@ -49,6 +51,11 @@ export function DownloadItem({ item }: DownloadItemProps) {
         console.error("Erro ao processar mensagem SSE:", err);
       }
     });
+
+    eventStream.onerror = () => {
+      setError("Erro Desconhecido.");
+      eventStream.close();
+    };
   }, [item]);
 
   useEffect(() => {
@@ -57,11 +64,15 @@ export function DownloadItem({ item }: DownloadItemProps) {
 
   return (
     <div className="flex flex-col gap-1 items-center bg-muted/10 hover:bg-muted/20 w-full rounded-md p-2">
-      <div className="flex flex-row w-full py-2">
-        <div className="flex flex-col gap-1 w-full">
-          <DownloadStatus status={status} error={error} />
-          <span className="text-sm">Nome do item</span>
-        </div>
+      <div className="flex flex-row justify-between w-full py-2">
+        <span
+          className={cn("text-sm", {
+            "text-red-500": error,
+          })}
+        >
+          {!error ? "Nome do item" : error}
+        </span>
+
         <div className="w-auto mr-3">
           {status === "error" && (
             <RefreshBtn className="text-red-500" downloadItem={downloadItem} />
