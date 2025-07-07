@@ -26,6 +26,7 @@ interface DownloadItemProps extends ComponentPropsWithoutRef<"div"> {
 export function DownloadItem({ item, setPasteItems }: DownloadItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
 
+  const [title, setTitle] = useState<string>("");
   const [status, setStatus] = useState<TDownloadStatus>("downloading");
   const [error, setError] = useState<string>("");
   const [progress, setProgress] = useState(5);
@@ -44,6 +45,8 @@ export function DownloadItem({ item, setPasteItems }: DownloadItemProps) {
       try {
         const data = JSON.parse(event.data);
 
+        if (data.title.trim() !== "") setTitle(data.title);
+
         setStatus(data.status);
 
         if (data.status === "error") {
@@ -61,7 +64,6 @@ export function DownloadItem({ item, setPasteItems }: DownloadItemProps) {
     });
 
     eventStream.onerror = () => {
-      setError("Erro Desconhecido.");
       eventStream.close();
     };
   }, [item]);
@@ -86,7 +88,7 @@ export function DownloadItem({ item, setPasteItems }: DownloadItemProps) {
               "text-red-500": error,
             })}
           >
-            {!error ? "Nome do item" : error}
+            {!error ? title : error}
           </span>
 
           <div className="w-auto mr-3">

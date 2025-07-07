@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         return;
       }
 
-      const finalPath = path.join(downloadPath, "%(title)s.%(ext)s");
+      // const finalPath = path.join(downloadPath, "%(title)s.%(ext)s");
 
       // CRIA O SUBPROCESSO PARA DOWNLOAD
       const subprocess = youtubeDl.exec(
@@ -88,8 +88,11 @@ export async function GET(request: NextRequest) {
         {
           newline: true,
           ffmpegLocation: ffmpegPath,
-          writeThumbnail: true,
-          output: finalPath,
+          writeThumbnail: false,
+          paths: downloadPath,
+          output: "%(title)s.%(ext)s",
+          mergeOutputFormat: "mkv",
+          // verbose: true,
         },
         { stdio: ["ignore", "pipe", "pipe"] }
       );
@@ -105,18 +108,51 @@ export async function GET(request: NextRequest) {
             if (line.startsWith("[download]")) {
               const content = line.replace(/^\[download]\s*/, "").split("%")[0];
 
+              let title = "Downloading...";
+              if (content.includes("Destination")) {
+                const parts = content.split("\\")[-1];
+                title = parts[parts.lenght - 1].replace(/\.[^/]+$/);
+              }
+
               if (content === "NA") {
                 console.log("[Progress] Progress unavailable (NA)");
                 controller.enqueue(
                   encoder.encode(
-                    `event:status\ndata:${JSON.stringify({
-                      status: "processing",
-                      message: "Progress unavailable",
-                    })}\n\n`
+                    SSEHelper({
+                      event: "status",
+                      data: {
+                        status: "downloading",
+                        progress: 10,
+                        title,
+                      },
+                    })
                   )
                 );
                 continue;
               }
+
+              if (content.includes("has already been downloaded")) {
+                console.log("[ALREADY]:", content);
+
+                const parts = content.split("\\")[-1];
+                title = parts[parts.lenght - 1].replace(/\.[^/]+$/);
+
+                controller.enqueue(
+                  encoder.encode(
+                    SSEHelper({
+                      event: "status",
+                      data: {
+                        status: "downloaded",
+                        progress: 100,
+                        title,
+                      },
+                    })
+                  )
+                );
+                return;
+              }
+
+              // TRAZER TITLE PARA FRONT
 
               console.log("[PROGRESS]: ", content + "%");
 
@@ -127,6 +163,7 @@ export async function GET(request: NextRequest) {
                     data: {
                       status: "downloading",
                       progress: content,
+                      title,
                     },
                   })
                 )
